@@ -2,21 +2,21 @@ from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['DEBUG'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:giraFFe17@localhost:8889/get-it-done'
+app.config['DEBUG'] = True
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:giraFFe17@localhost:8889/build-a-blog'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 app.secret_key = 'giraFFE17'
 
 
 
-class blog_entries(db.Model):
+class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     blog_title = db.Column(db.String(120))
     blog_text  = db.Column(db.String(2000))
 
-    def __init__(self, blog_title, blog_text):
+    def __init__(self, title, text):
         self.blog_title = title
         self.blog_text = text
 
@@ -26,48 +26,25 @@ def add_post():
     if request.method == 'POST':
         title = request.form['title']
         text = request.form['text']
-        post = User.query.filter_by(title=title).first()
-        if user:
-            flash("New Blog Entry")
-            return redirect('/')
-    return render_template('/add-post')
-
-
+        post = Blog(title, text)
+        db.session.add(post)
+        db.session.commit()
+        flash("New Blog Entry")
+        return redirect('/')
+    else:
+        return render_template('add-post.html')
 
 @app.route('/', methods=['POST', 'GET'])
-def register():
+def display_post():
+
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        verify = request.form['verify']
+        blog_title = request.form['title'] 
+        blog_text = request.form['text']
+        
+    else:
 
-        # TODO - validate user's data
-
-        existing_user = User.query.filter_by(email=email).first()
-        if not existing_user:
-            new_user = User(email, password)
-            db.session.add(new_user)
-            db.session.commit()
-            session['email'] = email
-            return redirect('/')
-        else:
-            # TODO - user better response messaging
-            return "<h1>Duplicate user</h1>"
-
-    return render_template('register.html')
-
-
-
-@app.route('/delete-post', methods=['POST'])
-def delete_task():
-
-    blog_id = int(request.form['id'])
-    id = Task.query.get(blog_id)
-    id.completed = True
-    db.session.add(id)
-    db.session.commit()
-
-    return redirect('/')
+        blog_enteries = Blog.query.all()
+        return render_template('todos.html', blog_enteries=blog_enteries)
 
 
 if __name__ == '__main__':

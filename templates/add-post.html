@@ -4,8 +4,10 @@
 
 <h1>Add a Blog Post</h1>
 
-<form action="/" method="POST">
+<form action="/add-post" method="POST">
     Post Title <input value="Type Here" type="text" name="title"><br>
-    <textarea name="text">{0}</textarea><br>
+    <textarea name="text">Type Here</textarea><br>
     <input type="submit" value="Submit Post">
 </form>
+
+{% endblock %}
